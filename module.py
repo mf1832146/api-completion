@@ -17,19 +17,13 @@ class StandardLSTM(nn.Module):
                                 out_features=api_vocab)
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, class_seq, api_seq):
-        """
-        :param class_seq: [batch_size, max_len]
-        :param api_seq:  [batch_size, max_len]
-        :return:
-        """
+    def forward(self, inputs):
+        class_seq, api_seq = inputs
         api_len = torch.sum(api_seq != 0, dim=1)
         api_len = (api_len - 1).tolist()
         api_emb = self.emb_layer(class_seq, api_seq)
         output, _ = self.rnn(api_emb.permute([1, 0, 2]))
         output = output.permute([1, 0, 2])
-        #output = torch.gather(output, 1, api_len)
-        #output = output[-1].view(batch_size, func_len, -1)
         output = output[range(len(api_len)), api_len]
         output = self.dropout(output)
         output = self.linear(output)
@@ -51,3 +45,11 @@ class APIEmbLayer(nn.Module):
         api_emb = self.api_emb_layer(api_seq)
         api_emb = torch.cat((class_emb, api_emb), dim=-1)
         return api_emb * math.sqrt(self.d_model)
+
+
+def make_model(args, api_vocab_size, class_vocab_size):
+    model = StandardLSTM(api_vocab=api_vocab_size, api_emb_dim=args.api_emb_dim,
+                         class_vocab=class_vocab_size, class_emb_dim=args.class_emb_dim,
+                         hidden_size=args.hidden_size,
+                         dropout=args.dropout)
+    return model
