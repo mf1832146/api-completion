@@ -34,7 +34,7 @@ class MyDataSet(Dataset):
         class_seq = [self.class_dict[x] if x in self.class_dict else 1 for x in class_seq]
         api_seq = [[self.api_dict[x] if x in self.api_dict else 1 for x in y] for y in api_seq]
 
-        candidate_api_seq = self.class_to_api_dict[self.class_dict[hole_class]]
+        candidate_api_seq = self.class_to_api_dict[self.class_dict[hole_class] if hole_class in self.class_dict else 1]
         if len(candidate_api_seq) < self.max_candidate_api_len:
             candidate_api_seq.extend([0] * self.max_candidate_api_len)
             candidate_api_seq = candidate_api_seq[:self.max_candidate_api_len]
