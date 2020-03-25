@@ -11,15 +11,17 @@ from ignite.contrib.handlers.tensorboard_logger import *
 
 
 class Solver:
-    def __init__(self, args, model, api_dict, class_dict):
+    def __init__(self, args, model, api_dict, class_dict, class_to_api_dict):
         self.args = args
         self.model = model
         self.api_dict = api_dict
         self.class_dict = class_dict
+        self.class_to_api_dict = class_to_api_dict
 
     def train(self):
         train_loader, valid_loader = dataset.get_data_loaders(self.api_dict,
                                                               self.class_dict,
+                                                              self.class_to_api_dict,
                                                               self.args)
         device = "cpu"
 
@@ -48,10 +50,10 @@ class Solver:
         validation_evaluator = create_supervised_evaluator(self.model, metrics, device)
 
         # save model
-        save_handler = ModelCheckpoint('train/models', n_saved=10,
+        save_handler = ModelCheckpoint('train/models/'+self.args.model, n_saved=10,
                                        filename_prefix='prefix',
                                        create_dir=True)
-        trainer.add_event_handler(Events.EPOCH_COMPLETED(every=2), save_handler, {"lstm": self.model})
+        trainer.add_event_handler(Events.EPOCH_COMPLETED(every=2), save_handler, {self.args.model: self.model})
 
         # early stop
         early_stop_handler = EarlyStopping(patience=10, score_function=self.score_function, trainer=trainer)
@@ -62,7 +64,7 @@ class Solver:
             train_evaluator.run(train_loader)
             validation_evaluator.run(valid_loader)
 
-        tb_logger = TensorboardLogger(self.args.log_dir)
+        tb_logger = TensorboardLogger(self.args.log_dir + self.args.model + '/')
 
         tb_logger.attach(
             trainer,

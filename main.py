@@ -17,9 +17,10 @@ def parse():
     parser.add_argument('-train', action='store_true')
     parser.add_argument('-test', action='store_true')
     parser.add_argument('-log_dir', type=str, default='tb_logs/')
+    parser.add_argument('-model', type=str, default='my_model')
 
-    parser.add_argument('-class_max_len', type=int, default=20, help='the max number of classes in an API seq')
-    parser.add_argument('-api_max_len', type=int, default=20, help='the max number of APIs in a class')
+    parser.add_argument('-class_max_len', type=int, default=10, help='the max number of classes in an API seq')
+    parser.add_argument('-api_max_len', type=int, default=10, help='the max number of APIs in a class')
 
     parser.add_argument('-api_emb_dim', default=128)
     parser.add_argument('-class_emb_dim', default=128)
@@ -31,14 +32,30 @@ def parse():
     return args
 
 
-def load_api_dict(api_dict_path):
+def load_dict(api_dict_path):
     api_dict = {"PAD": 0, "UNK": 1, "HOLE": 2}
-    ids = 3
+    class_dict = {"PAD": 0, "UNK": 1}
+    class_to_api_dict = {1: [1]}
+    api_ids = 3
+    class_ids = 2
     with open(api_dict_path, 'r') as f:
         for line in f:
-            api_dict[line.strip()] = ids
-            ids += 1
-    return api_dict
+            line = line.strip()
+
+            api_dict[line] = api_ids
+
+            class_name = line.split('.')[0]
+            if class_name not in class_dict:
+                class_dict[class_name] = class_ids
+                class_ids += 1
+
+            class_id = class_dict[class_name]
+            if class_id not in class_to_api_dict:
+                class_to_api_dict[class_id] = []
+            class_to_api_dict[class_id].append(api_ids)
+
+            api_ids += 1
+    return api_dict, class_dict, class_to_api_dict
 
 
 def load_class_dict(class_dict_path):
@@ -62,8 +79,7 @@ if __name__ == '__main__':
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
 
-    api_dict = load_api_dict(args.data_dir + args.api_dict)
-    class_dict = load_class_dict(args.data_dir + args.class_dict)
+    api_dict, class_dict, class_to_api_dict = load_dict(args.data_dir + args.api_dict)
     model = module.make_model(args, len(api_dict), len(class_dict))
-    solver = train.Solver(args, model, api_dict, class_dict)
+    solver = train.Solver(args, model, api_dict, class_dict, class_to_api_dict)
     solver.train()
