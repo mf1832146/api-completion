@@ -187,23 +187,23 @@ def load_data_set(data_set_path):
 
 def get_data_loaders(api_dict, class_dict, class_to_api_dict, args):
     if args.model == 'lstm':
-        train_data_set = StandardDataSet(args.data_dir + 'test_train/data_set.txt',
+        train_data_set = StandardDataSet(args.data_dir + 'train/data_set.txt',
                                          api_dict,
                                          class_dict,
                                          args.api_max_len)
 
-        valid_data_set = StandardDataSet(args.data_dir + 'test_valid/data_set.txt',
+        valid_data_set = StandardDataSet(args.data_dir + 'valid/data_set.txt',
                                          api_dict,
                                          class_dict,
                                          args.api_max_len)
     elif args.model == 'my_model':
-        train_data_set = MyDataSet(args.data_dir + 'test_train/data_set.txt',
+        train_data_set = MyDataSet(args.data_dir + 'train/data_set.txt',
                                    api_dict,
                                    class_dict,
                                    class_to_api_dict,
                                    args.class_max_len,
                                    args.api_max_len)
-        valid_data_set = MyDataSet(args.data_dir + 'test_valid/data_set.txt',
+        valid_data_set = MyDataSet(args.data_dir + 'valid/data_set.txt',
                                    api_dict,
                                    class_dict,
                                    class_to_api_dict,
