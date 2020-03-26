@@ -90,12 +90,12 @@ def test(args, api_dict, class_dict, class_to_api_dict):
 
             mrr_batch = 1 / (hit_loc + 1)
             for j in range(10):
-                mrr_with_seq_len[j] += torch.sum(mrr_batch * (seq_len == (j+1))).data.numpy()
-                mrr_with_class_num[j] += torch.sum(mrr_batch * (class_num == (j+1))).data.numpy()
+                mrr_with_seq_len[j] += torch.sum(mrr_batch * (seq_len == (j+1)).long()).data.numpy()
+                mrr_with_class_num[j] += torch.sum(mrr_batch * (class_num == (j+1)).long()).data.numpy()
                 total_num_wih_seq_len[j] += torch.sum(seq_len == (j+1)).data.numpy()
                 total_num_with_class_num[j] += torch.sum(class_num == (j+1)).data.numpy()
                 if j < 5:
-                    mrr_with_hole_loc[j] += torch.sum(mrr_batch * (hole_rate == (j+1))).data.numpy()
+                    mrr_with_hole_loc[j] += torch.sum(mrr_batch * (hole_rate == (j+1)).long()).data.numpy()
                     total_num_wih_hole_loc[j] += torch.sum(hole_rate == (j+1)).data.numpy()
             total_num += label.size(0)
 
