@@ -50,7 +50,7 @@ class Solver:
         validation_evaluator = create_supervised_evaluator(self.model, metrics, device)
 
         # save model
-        save_handler = ModelCheckpoint('models/'+self.args.model, n_saved=3,
+        save_handler = ModelCheckpoint('models/'+self.args.model, n_saved=5,
                                        filename_prefix='',
                                        create_dir=True,
                                        global_step_transform=lambda e, _: e.state.epoch)

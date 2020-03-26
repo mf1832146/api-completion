@@ -192,16 +192,16 @@ def deal_with_sample(api_seq):
     seq_len = len(api_seq) / 2
     hole_loc = (api_seq.index('HOLE') + 1) / 2
     hole_loc = hole_loc / seq_len
-    if hole_loc < 1/5:
+    if hole_loc <= 1/5:
         hole_rate = 1
-    elif hole_loc < 2/5:
+    elif hole_loc <= 2/5:
         hole_rate = 2
-    elif hole_loc < 3/5:
+    elif hole_loc <= 3/5:
         hole_rate = 3
-    elif hole_loc < 4/5:
+    elif hole_loc <= 4/5:
         hole_rate = 4
     else:
-        hole_rate = 1
+        hole_rate = 5
     class_set = set()
     for i, api in enumerate(api_seq):
         if i % 2 == 0:
@@ -214,23 +214,23 @@ def deal_with_sample(api_seq):
 
 def get_data_loaders(api_dict, class_dict, class_to_api_dict, args):
     if args.model == 'lstm':
-        train_data_set = StandardDataSet(args.data_dir + 'test_train/data_set.txt',
+        train_data_set = StandardDataSet(args.data_dir + 'train/data_set.txt',
                                          api_dict,
                                          class_dict,
                                          args.api_max_len)
 
-        valid_data_set = StandardDataSet(args.data_dir + 'test_valid/data_set.txt',
+        valid_data_set = StandardDataSet(args.data_dir + 'valid/data_set.txt',
                                          api_dict,
                                          class_dict,
                                          args.api_max_len)
     elif args.model == 'my_model':
-        train_data_set = MyDataSet(args.data_dir + 'test_train/data_set.txt',
+        train_data_set = MyDataSet(args.data_dir + 'train/data_set.txt',
                                    api_dict,
                                    class_dict,
                                    class_to_api_dict,
                                    args.class_max_len,
                                    args.api_max_len)
-        valid_data_set = MyDataSet(args.data_dir + 'test_valid/data_set.txt',
+        valid_data_set = MyDataSet(args.data_dir + 'valid/data_set.txt',
                                    api_dict,
                                    class_dict,
                                    class_to_api_dict,

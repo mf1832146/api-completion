@@ -72,7 +72,7 @@ class MyModel(nn.Module):
         #output = F.relu(self.linear(output))
         output = F.tanh(self.linear(output))
         output = torch.sum(torch.mul(output.unsqueeze(1), candidate_api_emb), dim=2)
-
+        output = output.masked_fill(candidate_api_seq == 0, -1e9)
         return output
 
 
