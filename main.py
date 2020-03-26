@@ -17,7 +17,7 @@ def parse():
     parser.add_argument('-train', action='store_true')
     parser.add_argument('-test', action='store_true')
     parser.add_argument('-log_dir', type=str, default='tb_logs/')
-    parser.add_argument('-model', type=str, default='my_model')
+    parser.add_argument('-model', type=str, default='my_model_1.0')
 
     parser.add_argument('-class_max_len', type=int, default=10, help='the max number of classes in an API seq')
     parser.add_argument('-api_max_len', type=int, default=10, help='the max number of APIs in a class')

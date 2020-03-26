@@ -69,7 +69,8 @@ class MyModel(nn.Module):
         func_output = self.dropout(func_output)
 
         output = func_output[range(len(hole_loc)), hole_loc]
-        output = F.relu(self.linear(output))
+        #output = F.relu(self.linear(output))
+        output = self.linear(output)
         output = torch.sum(torch.mul(output.unsqueeze(1), candidate_api_emb), dim=2)
 
         return output
@@ -124,7 +125,7 @@ def make_model(args, api_vocab_size, class_vocab_size):
                              class_vocab=class_vocab_size, class_emb_dim=args.class_emb_dim,
                              hidden_size=args.hidden_size,
                              dropout=args.dropout)
-    elif args.model == 'my_model':
+    elif args.model == 'my_model_1.0':
         model = MyModel(api_vocab=api_vocab_size, api_emb_dim=args.api_emb_dim,
                         class_vocab=class_vocab_size, class_emb_dim=args.class_emb_dim,
                         hidden_size=args.hidden_size,
