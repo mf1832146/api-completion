@@ -2,6 +2,7 @@ import argparse
 import module
 import train
 import logging
+import test
 
 
 def parse():
@@ -16,8 +17,8 @@ def parse():
     parser.add_argument('-load',  action='store_true', help='load pretrained model')
     parser.add_argument('-train', action='store_true')
     parser.add_argument('-test', action='store_true')
-    parser.add_argument('-log_dir', type=str, default='tb_logs/')
-    parser.add_argument('-model', type=str, default='my_model_1.0')
+    parser.add_argument('-log_dir', type=str, default='train_logs/')
+    parser.add_argument('-model', type=str, default='lstm')
 
     parser.add_argument('-class_max_len', type=int, default=10, help='the max number of classes in an API seq')
     parser.add_argument('-api_max_len', type=int, default=10, help='the max number of APIs in a class')
@@ -82,4 +83,7 @@ if __name__ == '__main__':
     api_dict, class_dict, class_to_api_dict = load_dict(args.data_dir + args.api_dict)
     model = module.make_model(args, len(api_dict), len(class_dict))
     solver = train.Solver(args, model, api_dict, class_dict, class_to_api_dict)
-    solver.train()
+    if args.train:
+        solver.train()
+    elif args.test:
+        test.test(args, api_dict, class_dict, class_to_api_dict)

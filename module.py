@@ -33,7 +33,7 @@ class MyModel(nn.Module):
         api_seq [batch_size, max_class_len, max_api_len]
         candidate_api_seq [batch_size, max_candidate_len]
         """
-        class_seq, api_seq, candidate_api_seq = inputs
+        class_seq, api_seq, candidate_api_seq, _ = inputs
         batch_size, max_class_len, max_api_len = api_seq.size()
         hole_loc = (api_seq == 2).nonzero()[:, 1]
         api_seq = api_seq.view(-1, max_api_len)
@@ -90,7 +90,7 @@ class StandardLSTM(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, inputs):
-        class_seq, api_seq = inputs
+        class_seq, api_seq, _ = inputs
         api_len = torch.sum(api_seq != 0, dim=1)
         api_len = (api_len - 1).tolist()
         api_emb = self.emb_layer(class_seq, api_seq)
@@ -125,7 +125,7 @@ def make_model(args, api_vocab_size, class_vocab_size):
                              class_vocab=class_vocab_size, class_emb_dim=args.class_emb_dim,
                              hidden_size=args.hidden_size,
                              dropout=args.dropout)
-    elif args.model == 'my_model_1.0':
+    elif args.model == 'my_model':
         model = MyModel(api_vocab=api_vocab_size, api_emb_dim=args.api_emb_dim,
                         class_vocab=class_vocab_size, class_emb_dim=args.class_emb_dim,
                         hidden_size=args.hidden_size,

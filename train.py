@@ -50,9 +50,10 @@ class Solver:
         validation_evaluator = create_supervised_evaluator(self.model, metrics, device)
 
         # save model
-        save_handler = ModelCheckpoint('train/models/'+self.args.model, n_saved=10,
-                                       filename_prefix='prefix',
-                                       create_dir=True)
+        save_handler = ModelCheckpoint('models/'+self.args.model, n_saved=3,
+                                       filename_prefix='',
+                                       create_dir=True,
+                                       global_step_transform=lambda e, _: e.state.epoch)
         trainer.add_event_handler(Events.EPOCH_COMPLETED(every=2), save_handler, {self.args.model: self.model})
 
         # early stop

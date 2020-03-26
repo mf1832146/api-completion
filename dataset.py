@@ -20,6 +20,7 @@ class MyDataSet(Dataset):
         sample = self.data_set[index]
 
         data = sample['data']
+        seq_info = deal_with_sample(data.split())
         class_seq, api_seq, hole_class = self.get_sample(data)
         for i in range(len(api_seq)):
             if len(api_seq[i]) < self.max_api_len:
@@ -50,8 +51,9 @@ class MyDataSet(Dataset):
         class_seq = torch.LongTensor(class_seq)
         api_seq = torch.LongTensor(api_seq)
         candidate_api_seq = torch.LongTensor(candidate_api_seq)
+        seq_info = torch.LongTensor(seq_info)
 
-        return (class_seq, api_seq, candidate_api_seq), label
+        return (class_seq, api_seq, candidate_api_seq, seq_info), label
 
     def get_sample(self, api_seq):
         items = api_seq.split()
@@ -125,6 +127,7 @@ class StandardDataSet(Dataset):
         api_seq = []
         class_seq = []
         items = data.split()
+        seq_info = deal_with_sample(items)
         for i, api in enumerate(items):
             if i % 2 == 0:
                 class_seq.append(api)
@@ -144,9 +147,9 @@ class StandardDataSet(Dataset):
         """list to tensor"""
         api_seq = torch.LongTensor(api_seq)
         class_seq = torch.LongTensor(class_seq)
-        # label = torch.LongTensor(label)
+        seq_info = torch.LongTensor(seq_info)
 
-        return (class_seq, api_seq), label
+        return (class_seq, api_seq, seq_info), label
 
 
 def pad_seq(class_seq, api_seq, max_len):
@@ -185,6 +188,30 @@ def load_data_set(data_set_path):
     return data
 
 
+def deal_with_sample(api_seq):
+    seq_len = len(api_seq) / 2
+    hole_loc = (api_seq.index('HOLE') + 1) / 2
+    hole_loc = hole_loc / seq_len
+    if hole_loc < 1/5:
+        hole_rate = 1
+    elif hole_loc < 2/5:
+        hole_rate = 2
+    elif hole_loc < 3/5:
+        hole_rate = 3
+    elif hole_loc < 4/5:
+        hole_rate = 4
+    else:
+        hole_rate = 1
+    class_set = set()
+    for i, api in enumerate(api_seq):
+        if i % 2 == 0:
+            class_set.add(api)
+    class_num = len(class_set)
+
+    seq_info = [seq_len, hole_rate, class_num]
+    return seq_info
+
+
 def get_data_loaders(api_dict, class_dict, class_to_api_dict, args):
     if args.model == 'lstm':
         train_data_set = StandardDataSet(args.data_dir + 'test_train/data_set.txt',
@@ -196,14 +223,14 @@ def get_data_loaders(api_dict, class_dict, class_to_api_dict, args):
                                          api_dict,
                                          class_dict,
                                          args.api_max_len)
-    elif args.model == 'my_model_1.0':
-        train_data_set = MyDataSet(args.data_dir + 'train/data_set.txt',
+    elif args.model == 'my_model':
+        train_data_set = MyDataSet(args.data_dir + 'test_train/data_set.txt',
                                    api_dict,
                                    class_dict,
                                    class_to_api_dict,
                                    args.class_max_len,
                                    args.api_max_len)
-        valid_data_set = MyDataSet(args.data_dir + 'valid/data_set.txt',
+        valid_data_set = MyDataSet(args.data_dir + 'test_valid/data_set.txt',
                                    api_dict,
                                    class_dict,
                                    class_to_api_dict,
