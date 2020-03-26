@@ -70,7 +70,7 @@ class MyModel(nn.Module):
 
         output = func_output[range(len(hole_loc)), hole_loc]
         #output = F.relu(self.linear(output))
-        output = self.linear(output)
+        output = F.tanh(self.linear(output))
         output = torch.sum(torch.mul(output.unsqueeze(1), candidate_api_emb), dim=2)
 
         return output
