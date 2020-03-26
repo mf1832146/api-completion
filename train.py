@@ -33,17 +33,17 @@ class Solver:
         criterion = nn.CrossEntropyLoss()
         trainer = create_supervised_trainer(self.model, optimizer, criterion, device)
 
-        if sys.version_info > (3,):
-            from ignite.contrib.metrics.gpu_info import GpuInfo
-
-            try:
-                GpuInfo().attach(trainer)
-            except RuntimeError:
-                print(
-                    "INFO: By default, in this example it is possible to log GPU information (used memory, utilization). "
-                    "As there is no pynvml python package installed, GPU information won't be logged. Otherwise, please "
-                    "install it : `pip install pynvml`"
-                )
+        # if sys.version_info > (3,):
+        #     from ignite.contrib.metrics.gpu_info import GpuInfo
+        #
+        #     try:
+        #         GpuInfo().attach(trainer)
+        #     except RuntimeError:
+        #         print(
+        #             "INFO: By default, in this example it is possible to log GPU information (used memory, utilization). "
+        #             "As there is no pynvml python package installed, GPU information won't be logged. Otherwise, please "
+        #             "install it : `pip install pynvml`"
+        #         )
 
         metrics = {"top-1 acc": TopKCategoricalAccuracy(k=1), "loss": Loss(criterion)}
         train_evaluator = create_supervised_evaluator(self.model, metrics, device)
@@ -67,13 +67,13 @@ class Solver:
 
         tb_logger = TensorboardLogger(self.args.log_dir + self.args.model + '/')
 
-        tb_logger.attach(
-            trainer,
-            log_handler=OutputHandler(
-                tag="training", output_transform=lambda loss: {"batchloss": loss}, metric_names="all"
-            ),
-            event_name=Events.ITERATION_COMPLETED(every=50),
-        )
+        # tb_logger.attach(
+        #     trainer,
+        #     log_handler=OutputHandler(
+        #         tag="training", output_transform=lambda loss: {"batchloss": loss}, metric_names="all"
+        #     ),
+        #     event_name=Events.ITERATION_COMPLETED(every=50),
+        # )
 
         tb_logger.attach(
             train_evaluator,

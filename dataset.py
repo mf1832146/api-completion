@@ -214,7 +214,7 @@ def deal_with_sample(api_seq):
 
 def get_data_loaders(api_dict, class_dict, class_to_api_dict, args):
     if args.model == 'lstm':
-        train_data_set = StandardDataSet(args.data_dir + 'train/data_set.txt',
+        train_data_set = StandardDataSet(args.data_dir + 'train/data_set_all.txt',
                                          api_dict,
                                          class_dict,
                                          args.api_max_len)
@@ -224,7 +224,7 @@ def get_data_loaders(api_dict, class_dict, class_to_api_dict, args):
                                          class_dict,
                                          args.api_max_len)
     elif args.model == 'my_model':
-        train_data_set = MyDataSet(args.data_dir + 'train/data_set.txt',
+        train_data_set = MyDataSet(args.data_dir + 'train/data_set_all.txt',
                                    api_dict,
                                    class_dict,
                                    class_to_api_dict,
