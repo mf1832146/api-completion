@@ -15,7 +15,7 @@ test_projects = ['Froyo_Email.txt', 'galaxy.txt', 'GridSphere.txt', 'itext.txt',
 def load_model(args, api_vocab_size, class_vocab_size):
     model = module.make_model(args, api_vocab_size, class_vocab_size)
     checkpoint = torch.load(
-            'models/' + args.model + + '/' + args.model + args.model_path)
+            'models/' + args.model + '/' +  args.model_path)
     model.load_state_dict(checkpoint)
     return model
 
