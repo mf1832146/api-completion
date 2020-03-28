@@ -268,7 +268,7 @@ def deal_with_sample(api_seq):
 
 def get_data_loaders(api_dict, class_dict, class_to_api_dict, args):
     train_data_set_path = args.data_dir + 'train/data_set_all.txt'
-    valid_data_set_path = args.data_dir + 'test/data_set_all.txt'
+    valid_data_set_path = args.data_dir + 'valid/data_set_all.txt'
     if args.model == 'lstm':
         train_data_set = StandardDataSet(train_data_set_path,
                                          api_dict,
