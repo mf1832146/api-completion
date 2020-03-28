@@ -109,6 +109,60 @@ class MyDataSet(Dataset):
         return class_seq, api_seq
 
 
+class APIHelperDataSet(Dataset):
+    def __init__(self, data_path, api_dict, class_dict, class_to_api_dict, max_len):
+        self.api_dict = api_dict
+        self.class_dict = class_dict
+        self.max_len = max_len
+        self.data_set = load_data_set(data_path)
+        self.api_len = len(self.api_dict)
+        self.class_to_api_dict = class_to_api_dict
+
+    def __len__(self):
+        return len(self.data_set)
+
+    def __getitem__(self, index):
+        """pad the seq for each sample"""
+        sample = self.data_set[index]
+
+        data = sample['data']
+        api_seq = []
+        class_seq = []
+        items = data.split()
+
+        hole_loc = items.index('HOLE')
+        hole_class = items[hole_loc - 1]
+
+        seq_info = deal_with_sample(items)
+        for i, api in enumerate(items):
+            if i % 2 == 0:
+                class_seq.append(api)
+            else:
+                if api == "HOLE":
+                    api_seq.append('HOLE')
+                else:
+                    api_seq.append(items[i - 1] + '.' + api)
+
+        class_seq, api_seq = pad_seq(class_seq, api_seq, self.max_len)
+        api_seq = [self.api_dict[x] if x in self.api_dict else 1 for x in api_seq]
+        class_seq = [self.class_dict[x] if x in self.class_dict else 1 for x in class_seq]
+
+        label = sample['label']
+        label = self.api_dict[label] if label in self.api_dict else 1
+
+        candidate_api_seq = self.class_to_api_dict[self.class_dict[hole_class] if hole_class in self.class_dict else 1]
+        candidates = torch.zeros(self.api_len)
+        candidates[candidate_api_seq] = 1
+
+        """list to tensor"""
+        api_seq = torch.LongTensor(api_seq)
+        class_seq = torch.LongTensor(class_seq)
+        candidates = torch.FloatTensor(candidates)
+        seq_info = torch.LongTensor(seq_info)
+
+        return (class_seq, api_seq, candidates, seq_info), label
+
+
 class StandardDataSet(Dataset):
     def __init__(self, data_path, api_dict, class_dict, max_len):
         self.api_dict = api_dict
@@ -213,29 +267,41 @@ def deal_with_sample(api_seq):
 
 
 def get_data_loaders(api_dict, class_dict, class_to_api_dict, args):
+    train_data_set_path = args.data_dir + 'train/data_set.txt'
+    valid_data_set_path = args.data_dir + 'test/data_set.txt'
     if args.model == 'lstm':
-        train_data_set = StandardDataSet(args.data_dir + 'train/data_set.txt',
+        train_data_set = StandardDataSet(train_data_set_path,
                                          api_dict,
                                          class_dict,
                                          args.api_max_len)
-
-        valid_data_set = StandardDataSet(args.data_dir + 'valid/data_set.txt',
+        valid_data_set = StandardDataSet(valid_data_set_path,
                                          api_dict,
                                          class_dict,
                                          args.api_max_len)
     elif args.model == 'my_model':
-        train_data_set = MyDataSet(args.data_dir + 'train/data_set.txt',
+        train_data_set = MyDataSet(train_data_set_path,
                                    api_dict,
                                    class_dict,
                                    class_to_api_dict,
                                    args.class_max_len,
                                    args.api_max_len)
-        valid_data_set = MyDataSet(args.data_dir + 'valid/data_set.txt',
+        valid_data_set = MyDataSet(valid_data_set_path,
                                    api_dict,
                                    class_dict,
                                    class_to_api_dict,
                                    args.class_max_len,
                                    args.api_max_len)
+    elif args.model == 'APIHelper':
+        train_data_set = APIHelperDataSet(train_data_set_path,
+                                          api_dict,
+                                          class_dict,
+                                          class_to_api_dict,
+                                          args.api_max_len)
+        valid_data_set = APIHelperDataSet(valid_data_set_path,
+                                          api_dict,
+                                          class_dict,
+                                          class_to_api_dict,
+                                          args.api_max_len)
     train_loader = DataLoader(dataset=train_data_set,
                               batch_size=args.batch_size,
                               shuffle=True)

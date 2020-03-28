@@ -4,6 +4,7 @@ generate training and test data set
 import copy
 import random
 from tqdm import tqdm
+import os
 
 
 def generate_data_set(api_seq_path, save_path):
@@ -30,7 +31,7 @@ def generate_data_set(api_seq_path, save_path):
             else:
                 if label not in data_set:
                     data_set[label] = []
-                    data_set[label].append(sample)
+                data_set[label].append(sample)
 
     data_set = [sample for label in data_set for sample in data_set[label]]
 
@@ -66,15 +67,16 @@ def load_api_seq(api_seq_path):
     api_seq_data = []
     with open(api_seq_path, 'r') as f:
         for line in f:
+            if len(line.split()) > 30:
+                continue
             api_seq_data.append(line.strip())
     return api_seq_data
 
 
 def save_data_set(data_set, save_path):
-    with open(save_path + 'data_set_all.txt', 'w') as f:
+    with open(save_path + 'itext7-develop_all.txt', 'w') as f:
         for sample in data_set:
             f.write(' '.join(sample['data']) + ';' + sample['label'] + '\n')
 
-
 if __name__ == '__main__':
-    generate_data_set('/home/tangze/api_preocess/api_seq.txt', '/home/tangze/api_preocess/train/')
+    generate_data_set('/Users/tangze/study/projects/毕业设计/data/测试项目集/itext7-develop.txt', '/Users/tangze/study/projects/毕业设计/data/test/')

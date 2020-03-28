@@ -2,7 +2,7 @@ import torch
 from torch.utils.data import DataLoader
 import os
 import module
-from dataset import StandardDataSet, MyDataSet
+from dataset import StandardDataSet, MyDataSet, APIHelperDataSet
 
 try:
     from tensorboardX import SummaryWriter
@@ -15,7 +15,7 @@ test_projects = ['Froyo_Email.txt', 'galaxy.txt', 'GridSphere.txt', 'itext.txt',
 def load_model(args, api_vocab_size, class_vocab_size):
     model = module.make_model(args, api_vocab_size, class_vocab_size)
     checkpoint = torch.load(
-            'models/' + args.model + '/' +  args.model_path)
+            'models/' + args.model + '/' +  args.model + '_' + args.model_path + '.pth')
     model.load_state_dict(checkpoint)
     return model
 
@@ -54,6 +54,15 @@ def test(args, api_dict, class_dict, class_to_api_dict):
                                       class_to_api_dict,
                                       args.class_max_len,
                                       args.api_max_len)
+            test_data_loader = DataLoader(dataset=test_data_set,
+                                          batch_size=args.batch_size,
+                                          shuffle=False)
+        elif args.model == 'APIHelper':
+            test_data_set = APIHelperDataSet(project_path,
+                                             api_dict,
+                                             class_dict,
+                                             class_to_api_dict,
+                                             args.api_max_len)
             test_data_loader = DataLoader(dataset=test_data_set,
                                           batch_size=args.batch_size,
                                           shuffle=False)
