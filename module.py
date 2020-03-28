@@ -102,7 +102,7 @@ class APIHelper(nn.Module):
         output = self.dropout(output)
         output = self.linear(output)
         output = torch.tanh(output)
-        output = output + 0.3 * candidate_api_seq
+        output = output.masked_fill(candidate_api_seq == 0, -1e9)
         return output
 
 
