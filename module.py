@@ -92,7 +92,7 @@ class NGram(nn.Module):
         api_emb = api_emb.view(batch_size, -1)
         api_emb = self.dropout(api_emb)
         outputs = self.linear(api_emb)
-        outputs = torch.tanh(outputs)
+
         return outputs
 
 

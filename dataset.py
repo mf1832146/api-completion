@@ -290,6 +290,8 @@ def load_data_set(data_set_path):
 
 def deal_with_sample(api_seq):
     seq_len = len(api_seq) / 2
+    if seq_len > 10:
+        seq_len = 10
     hole_loc = (api_seq.index('HOLE') + 1) / 2
     hole_loc = hole_loc / seq_len
     if hole_loc <= 1/5:
