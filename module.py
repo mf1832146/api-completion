@@ -4,7 +4,6 @@ import torch.nn.functional as F
 import math
 
 from torch.autograd import Variable
-from torch.nn import init
 
 HOLE = 2
 
@@ -77,6 +76,24 @@ class MyModel(nn.Module):
         output = torch.sum(torch.mul(output.unsqueeze(1), candidate_api_emb), dim=2)
         output = output.masked_fill(candidate_api_seq == 0, -1e9)
         return output
+
+
+class NGram(nn.Module):
+    def __init__(self, api_vocab, api_emb_dim, n, dropout):
+        super(NGram, self).__init__()
+        self.api_emb = nn.Embedding(api_vocab, api_emb_dim, padding_idx=0)
+        self.linear = nn.Linear(api_emb_dim * n, api_vocab)
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, inputs):
+        api_seq, _ = inputs
+        batch_size = api_seq.size(0)
+        api_emb = self.api_emb(api_seq)
+        api_emb = api_emb.view(batch_size, -1)
+        api_emb = self.dropout(api_emb)
+        outputs = self.linear(api_emb)
+        outputs = torch.tanh(outputs)
+        return outputs
 
 
 class APIHelper(nn.Module):
@@ -168,4 +185,7 @@ def make_model(args, api_vocab_size, class_vocab_size):
                           class_vocab=class_vocab_size, class_emb_dim=args.class_emb_dim,
                           hidden_size=args.hidden_size,
                           dropout=args.dropout)
+    elif args.model == 'ngram':
+        model = NGram(api_vocab=api_vocab_size, api_emb_dim=args.api_emb_dim,
+                      n=4, dropout=args.dropout)
     return model

@@ -165,6 +165,50 @@ class APIHelperDataSet(Dataset):
         return (class_seq, api_seq, candidates, seq_info), label
 
 
+class NGramDataSet(Dataset):
+    def __init__(self, data_path, api_dict, class_dict, k):
+        self.api_dict = api_dict
+        self.class_dict = class_dict
+        self.k = k
+        self.data_set = load_data_set(data_path)
+
+    def __len__(self):
+        return len(self.data_set)
+
+    def __getitem__(self, index):
+        """pad the seq for each sample"""
+        sample = self.data_set[index]
+
+        data = sample['data']
+
+        items = data.split()
+        seq_info = deal_with_sample(items)
+
+        hole_loc = items.index('HOLE')
+
+        begin_index = hole_loc-1-2*self.k
+        end_index = hole_loc+2*self.k + 1
+        api_seq = []
+        for i in range(begin_index, end_index, 2):
+            if i < 0 or i > len(items)-2:
+                api_seq.append('PAD')
+            else:
+                class_name = items[i]
+                api_name = items[i+1]
+                if api_name == 'HOLE':
+                    continue
+                api_seq.append(class_name + '.' + api_name)
+        api_seq = [self.api_dict[x] if x in self.api_dict else 1 for x in api_seq]
+
+        label = sample['label']
+        label = self.api_dict[label] if label in self.api_dict else 1
+        """list to tensor"""
+        api_seq = torch.LongTensor(api_seq)
+        seq_info = torch.LongTensor(seq_info)
+
+        return (api_seq, seq_info), label
+
+
 class StandardDataSet(Dataset):
     def __init__(self, data_path, api_dict, class_dict, max_len):
         self.api_dict = api_dict
@@ -304,6 +348,16 @@ def get_data_loaders(api_dict, class_dict, class_to_api_dict, args):
                                           class_dict,
                                           class_to_api_dict,
                                           args.api_max_len)
+    elif args.model == 'ngram':
+        train_data_set = NGramDataSet(train_data_set_path,
+                                      api_dict,
+                                      class_dict,
+                                      2)
+        valid_data_set = NGramDataSet(valid_data_set_path,
+                                      api_dict,
+                                      class_dict,
+                                      2)
+
     train_loader = DataLoader(dataset=train_data_set,
                               batch_size=args.batch_size,
                               shuffle=True)

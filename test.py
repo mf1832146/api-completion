@@ -2,7 +2,7 @@ import torch
 from torch.utils.data import DataLoader
 import os
 import module
-from dataset import StandardDataSet, MyDataSet, APIHelperDataSet
+from dataset import StandardDataSet, MyDataSet, APIHelperDataSet, NGramDataSet
 
 try:
     from tensorboardX import SummaryWriter
@@ -68,7 +68,14 @@ def test(args, api_dict, class_dict, class_to_api_dict):
             test_data_loader = DataLoader(dataset=test_data_set,
                                           batch_size=args.batch_size,
                                           shuffle=False)
-
+        elif args.model == 'ngram':
+            test_data_set = NGramDataSet(project_path,
+                                         api_dict,
+                                         class_dict,
+                                         2)
+            test_data_loader = DataLoader(dataset=test_data_set,
+                                          batch_size=args.batch_size,
+                                          shuffle=False)
         """top-k Acc"""
         model.eval()
         top_k_num = [0] * 10
