@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import math
+
+from torch.autograd import Variable
 from torch.nn import init
 
 HOLE = 2
@@ -101,7 +103,8 @@ class APIHelper(nn.Module):
         output = output[range(len(hole_loc)), hole_loc]
         output = self.dropout(output)
         output = self.linear(output)
-        output = output.masked_fill(candidate_api_seq == 0, -1e9)
+        mask = Variable(candidate_api_seq == 0, requires_grad=False)
+        output = output.masked_fill(mask, -1e9)
         return output
 
 

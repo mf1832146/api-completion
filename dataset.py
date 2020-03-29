@@ -153,6 +153,8 @@ class APIHelperDataSet(Dataset):
         candidate_api_seq = self.class_to_api_dict[self.class_dict[hole_class] if hole_class in self.class_dict else 1]
         candidates = torch.zeros(self.api_len)
         candidates[candidate_api_seq] = 1
+        if label == 1:
+            candidates[label] = 1
 
         """list to tensor"""
         api_seq = torch.LongTensor(api_seq)

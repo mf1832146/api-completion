@@ -11,7 +11,6 @@ except ImportError:
 test_projects = ['Froyo_Email.txt', 'galaxy.txt', 'GridSphere.txt', 'itext.txt',
                      'jgit.txt', 'log4j.txt']
 
-
 def load_model(args, api_vocab_size, class_vocab_size):
     model = module.make_model(args, api_vocab_size, class_vocab_size)
     checkpoint = torch.load(
