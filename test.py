@@ -8,8 +8,9 @@ try:
     from tensorboardX import SummaryWriter
 except ImportError:
     raise RuntimeError("No tensorboardX package is found. Please install with the command: \npip install tensorboardX")
-test_projects = ['Froyo_Email.txt', 'galaxy.txt', 'GridSphere.txt', 'itext.txt',
-                     'jgit.txt', 'log4j.txt']
+#test_projects = ['Froyo_Email.txt', 'galaxy.txt', 'GridSphere.txt', 'itext.txt',
+#                     'jgit.txt', 'log4j.txt']
+
 
 def load_model(args, api_vocab_size, class_vocab_size):
     model = module.make_model(args, api_vocab_size, class_vocab_size)
@@ -35,6 +36,8 @@ def test(args, api_dict, class_dict, class_to_api_dict):
                 ttt *= s
             tt += ttt
     writer.add_scalar('total_parameter_num', tt, 0)
+
+    test_projects = os.listdir(args.data_dir + 'test/')
 
     for test_project in test_projects:
         project_path = args.data_dir + 'test/' + test_project
