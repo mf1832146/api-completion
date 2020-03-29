@@ -63,7 +63,7 @@ def train(api_seq_path, class_to_api_dict, save_path):
 
 
 def deal_with_sample(api_seq):
-    seq_len = len(api_seq) / 2
+    seq_len = int(len(api_seq) / 2)
     if seq_len > 10:
         seq_len = 10
     hole_loc = (api_seq.index('HOLE') + 1) / 2
@@ -83,13 +83,18 @@ def deal_with_sample(api_seq):
         if i % 2 == 0:
             class_set.add(api)
     class_num = len(class_set)
+    if class_num > 10:
+        class_num = 10
 
     seq_info = [seq_len, hole_rate, class_num]
     return seq_info
 
 
-def test(test_path):
-    for file in test_path:
+def test_hmm(test_path, model_save_path):
+    for file in os.listdir(test_path):
+        if file == '.DS_Store':
+            continue
+        print(file)
         top_k_num = [0] * 10
         total_num = 0
         total_mrr = 0.0
@@ -106,13 +111,13 @@ def test(test_path):
                 data = items[0]
                 label = items[1]
                 hole_class = label.split('.')[0]
-                hit_loc, seq_info = test(data, hole_class, save_path, label)
+                hit_loc, seq_info = test(data, hole_class, model_save_path, label)
                 seq_len, hole_rate, class_num = seq_info
 
                 total_num += 1
                 total_num_with_class_num[class_num-1] += 1
                 total_num_wih_hole_loc[hole_rate-1] += 1
-                total_num_wih_seq_len[seq_len-1] += 1
+                total_num_wih_seq_len[int(seq_len-1)] += 1
 
                 if hit_loc == -1: # not hit
                     continue
@@ -154,15 +159,17 @@ def test(test_path):
     writer.close()
 
 
-
 def test(api_seq, hole_class, save_path, label):
+    observation_seq = []
+    items = api_seq.split()
+    seq_info = deal_with_sample(items)
+    class_model_list = os.listdir(save_path)
+    if hole_class + '.pkl' not in class_model_list:
+        return -1, seq_info
     with open(save_path + hole_class + '.pkl', 'rb') as f:
         out = pickle.load(f)
         api_list = out['api_list']
         model = out['model']
-    observation_seq = []
-    items = api_seq.split()
-    seq_info = deal_with_sample(items)
 
     for i in range(0, len(items)-1, 2):
         class_name = items[i]
@@ -179,7 +186,10 @@ def test(api_seq, hole_class, save_path, label):
     label_id = api_list.index(label) if label in api_list else -1
     for i in range(len(api_list)):
         observation_seq[hole_loc] = i
-        score = model.score(observation_seq)
+        try:
+            score = model.score([[x] for x in observation_seq])
+        except Exception:
+            return -1, seq_info
         scores.append(score)
 
     # sort by score
@@ -228,4 +238,5 @@ if __name__ == '__main__':
         for api_id in class_to_api_dict[class_id]:
             output[class_dict[class_id]].append(api_dict[api_id])
     # train(api_seq_path, output, save_path)
-    test('data/test/')
+    model_save_path = '../models/hmm/'
+    test_hmm('data/test/', model_save_path)

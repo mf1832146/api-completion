@@ -289,7 +289,7 @@ def load_data_set(data_set_path):
 
 
 def deal_with_sample(api_seq):
-    seq_len = len(api_seq) / 2
+    seq_len = int(len(api_seq) / 2)
     if seq_len > 10:
         seq_len = 10
     hole_loc = (api_seq.index('HOLE') + 1) / 2
@@ -309,6 +309,8 @@ def deal_with_sample(api_seq):
         if i % 2 == 0:
             class_set.add(api)
     class_num = len(class_set)
+    if class_num > 10:
+        class_num = 10
 
     seq_info = [seq_len, hole_rate, class_num]
     return seq_info
