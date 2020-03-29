@@ -131,7 +131,7 @@ def test_hmm(test_path, model_save_path):
                     total_mrr += mrr
 
         # write to tensorboard
-        writer = SummaryWriter(logdir='test_logs/hmm/')
+        writer = SummaryWriter(logdir='../test_logs/hmm/')
         for i in range(len(top_k_num)):
             top_k_i = top_k_num[i] / total_num
             writer.add_scalar(file + '/' + ' top-k', top_k_i, i + 1)
