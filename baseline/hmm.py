@@ -5,6 +5,7 @@ import numpy as np
 from hmmlearn import hmm
 import pickle
 from tqdm import tqdm
+import os
 
 
 def create_class_hmm(api_seq, save_path, class_name, api_list):
@@ -43,9 +44,15 @@ def read_api_seq(api_seq_path, class_to_api_dict):
     return data
 
 def train(api_seq_path, class_to_api_dict, save_path):
+    files = os.listdir(save_path)
     data = read_api_seq(api_seq_path, class_to_api_dict)
     for class_name in class_to_api_dict:
         if class_name == 'UNK':
+            continue
+        if class_name not in data:
+            continue
+        if class_name + '.pkl' in files:
+            print('already processed')
             continue
         print('deal with ', class_name)
         print('seq len:', len(data[class_name]))
