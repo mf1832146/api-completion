@@ -239,4 +239,4 @@ if __name__ == '__main__':
             output[class_dict[class_id]].append(api_dict[api_id])
     # train(api_seq_path, output, save_path)
     model_save_path = '../models/hmm/'
-    test_hmm('data/test/', model_save_path)
+    test_hmm('../data/test/', model_save_path)
