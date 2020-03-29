@@ -101,7 +101,6 @@ class APIHelper(nn.Module):
         output = output[range(len(hole_loc)), hole_loc]
         output = self.dropout(output)
         output = self.linear(output)
-        output = torch.tanh(output)
         output = output.masked_fill(candidate_api_seq == 0, -1e9)
         return output
 
