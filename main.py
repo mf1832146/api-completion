@@ -10,7 +10,7 @@ def parse():
     parser.add_argument('-model_dir', default='./train_model', help='output model weight dir')
     parser.add_argument('-batch_size', type=int, default=64)
     parser.add_argument('-max_epoch', type=int, default=250)
-    parser.add_argument('-model_path', type=str)
+    parser.add_argument('-model_path', type=str, default='20')
     parser.add_argument('-data_dir', default='./data/')
 
     parser.add_argument('-api_dict', default='api_dict.txt')
@@ -24,11 +24,13 @@ def parse():
     parser.add_argument('-class_max_len', type=int, default=10, help='the max number of classes in an API seq')
     parser.add_argument('-api_max_len', type=int, default=10, help='the max number of APIs in a class')
 
-    parser.add_argument('-api_emb_dim', default=128)
-    parser.add_argument('-class_emb_dim', default=128)
-    parser.add_argument('-hidden_size', default=256)
+    parser.add_argument('-api_emb_dim', type=int, default=128)
+    parser.add_argument('-class_emb_dim', type=int, default=128)
+    parser.add_argument('-hidden_size', type=int, default=256)
     parser.add_argument('-dropout', default=0.3)
     parser.add_argument('-lr', default=0.001)
+
+    parser.add_argument('-run', action='store_true')
 
     args = parser.parse_args()
     return args

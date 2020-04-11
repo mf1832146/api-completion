@@ -341,7 +341,7 @@ def get_data_loaders(api_dict, class_dict, class_to_api_dict, args):
                                    class_to_api_dict,
                                    args.class_max_len,
                                    args.api_max_len)
-    elif args.model == 'APIHelper':
+    elif args.model == 'APIHelper' or args.model == 'APIHelper+':
         train_data_set = APIHelperDataSet(train_data_set_path,
                                           api_dict,
                                           class_dict,

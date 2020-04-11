@@ -18,6 +18,15 @@ class Solver:
         self.class_dict = class_dict
         self.class_to_api_dict = class_to_api_dict
 
+        tt = 0
+        for name, param in self.model.named_parameters():
+            if param.requires_grad:
+                ttt = 1
+                for s in param.data.size():
+                    ttt *= s
+                tt += ttt
+        print('total param num:', tt/(1024*1024))
+
     def train(self):
         train_loader, valid_loader = dataset.get_data_loaders(self.api_dict,
                                                               self.class_dict,
@@ -32,18 +41,6 @@ class Solver:
         optimizer = optim.Adam(self.model.parameters(), lr=self.args.lr)
         criterion = nn.CrossEntropyLoss()
         trainer = create_supervised_trainer(self.model, optimizer, criterion, device)
-
-        # if sys.version_info > (3,):
-        #     from ignite.contrib.metrics.gpu_info import GpuInfo
-        #
-        #     try:
-        #         GpuInfo().attach(trainer)
-        #     except RuntimeError:
-        #         print(
-        #             "INFO: By default, in this example it is possible to log GPU information (used memory, utilization). "
-        #             "As there is no pynvml python package installed, GPU information won't be logged. Otherwise, please "
-        #             "install it : `pip install pynvml`"
-        #         )
 
         metrics = {"top-1 acc": TopKCategoricalAccuracy(k=1), "loss": Loss(criterion)}
         train_evaluator = create_supervised_evaluator(self.model, metrics, device)
@@ -66,14 +63,6 @@ class Solver:
             validation_evaluator.run(valid_loader)
 
         tb_logger = TensorboardLogger(self.args.log_dir + self.args.model + '/')
-
-        # tb_logger.attach(
-        #     trainer,
-        #     log_handler=OutputHandler(
-        #         tag="training", output_transform=lambda loss: {"batchloss": loss}, metric_names="all"
-        #     ),
-        #     event_name=Events.ITERATION_COMPLETED(every=50),
-        # )
 
         tb_logger.attach(
             train_evaluator,
