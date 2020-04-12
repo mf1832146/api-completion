@@ -28,6 +28,7 @@ class MyModel(nn.Module):
                                 batch_first=True)
         self.linear = nn.Linear(in_features=hidden_size,
                                 out_features=api_emb_dim)
+        self.class_attn = ClassAttn(class_emb_dim, hidden_size, dropout)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, inputs):
@@ -48,12 +49,18 @@ class MyModel(nn.Module):
         class_emb = class_emb.view(batch_size * max_class_len, -1)
         class_emb = class_emb.unsqueeze(1).repeat(1, max_api_len, 1)
         api_emb = torch.cat((class_emb, api_emb), dim=-1) * math.sqrt(self.class_emb_dim + self.api_emb_dim)
+        class_emb = class_emb * math.sqrt(self.class_emb_dim)
         candidate_api_emb = self.api_emb_layer(candidate_api_seq) * math.sqrt(self.api_emb_dim)
 
         class_output, _ = self.class_rnn(api_emb)
+        # batch_size*max_len, max_len, max hidden_size
+        mask = api_seq == 0
         class_output = self.dropout(class_output)
+        class_emb = class_emb[range(len(hole_loc)), hole_loc]
+        class_emb = class_emb.repeat(max_class_len, 1)
+        class_output = self.class_attn(class_emb, class_output, mask)
 
-        class_output = class_output[range(len(api_len)), api_len]
+        #class_output = class_output[range(len(api_len)), api_len]
         class_output = class_output.view(batch_size, max_class_len, -1)
 
         class_len = torch.sum(class_seq != 0, dim=1)
