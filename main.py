@@ -8,7 +8,7 @@ import test
 def parse():
     parser = argparse.ArgumentParser(description='api completion')
     parser.add_argument('-model_dir', default='./train_model', help='output model weight dir')
-    parser.add_argument('-batch_size', type=int, default=64)
+    parser.add_argument('-batch_size', type=int, default=256)
     parser.add_argument('-max_epoch', type=int, default=250)
     parser.add_argument('-model_path', type=str, default='20')
     parser.add_argument('-data_dir', default='./data/')
