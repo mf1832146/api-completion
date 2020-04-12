@@ -12,7 +12,8 @@ class MyModel(nn.Module):
     def __init__(self, api_vocab, api_emb_dim,
                  class_vocab, class_emb_dim,
                  hidden_size,
-                 dropout=0.0):
+                 dropout=0.0,
+                 class_attn=False):
         super(MyModel, self).__init__()
         self.api_emb_layer = nn.Embedding(api_vocab, api_emb_dim, padding_idx=0)
         self.class_emb_layer = nn.Embedding(class_vocab, class_emb_dim, padding_idx=0)
@@ -28,7 +29,10 @@ class MyModel(nn.Module):
                                 batch_first=True)
         self.linear = nn.Linear(in_features=hidden_size,
                                 out_features=api_emb_dim)
-        self.class_attn = ClassAttn(class_emb_dim, hidden_size, dropout)
+        if class_attn:
+            self.class_attn = ClassAttn(class_emb_dim, hidden_size, dropout)
+        else:
+            self.class_attn = None
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, inputs):
@@ -54,13 +58,15 @@ class MyModel(nn.Module):
 
         class_output, _ = self.class_rnn(api_emb)
         # batch_size*max_len, max_len, max hidden_size
-        mask = api_seq == 0
-        class_output = self.dropout(class_output)
-        class_emb = class_emb[range(len(hole_loc)), hole_loc]
-        class_emb = class_emb.repeat(max_class_len, 1)
-        class_output = self.class_attn(class_emb, class_output, mask)
+        if self.class_attn is not None:
+            mask = api_seq == 0
+            class_output = self.dropout(class_output)
+            class_emb = class_emb[range(len(hole_loc)), hole_loc]
+            class_emb = class_emb.repeat(max_class_len, 1)
+            class_output = self.class_attn(class_emb, class_output, mask)
+        else:
+            class_output = class_output[range(len(api_len)), api_len]
 
-        #class_output = class_output[range(len(api_len)), api_len]
         class_output = class_output.view(batch_size, max_class_len, -1)
 
         class_len = torch.sum(class_seq != 0, dim=1)
@@ -229,7 +235,8 @@ def make_model(args, api_vocab_size, class_vocab_size):
         model = MyModel(api_vocab=api_vocab_size, api_emb_dim=args.api_emb_dim,
                         class_vocab=class_vocab_size, class_emb_dim=args.class_emb_dim,
                         hidden_size=args.hidden_size,
-                        dropout=args.dropout)
+                        dropout=args.dropout,
+                        class_attn=False)
     elif args.model == 'APIHelper':
         model = APIHelper(api_vocab=api_vocab_size, api_emb_dim=args.api_emb_dim,
                           class_vocab=class_vocab_size, class_emb_dim=args.class_emb_dim,
@@ -242,6 +249,12 @@ def make_model(args, api_vocab_size, class_vocab_size):
                           hidden_size=args.hidden_size,
                           dropout=args.dropout,
                           class_attn=True)
+    elif args.model == 'my_model+':
+        model = MyModel(api_vocab=api_vocab_size, api_emb_dim=args.api_emb_dim,
+                        class_vocab=class_vocab_size, class_emb_dim=args.class_emb_dim,
+                        hidden_size=args.hidden_size,
+                        dropout=args.dropout,
+                        class_attn=True)
     elif args.model == 'ngram':
         model = NGram(api_vocab=api_vocab_size, api_emb_dim=args.api_emb_dim,
                       n=4, dropout=args.dropout)

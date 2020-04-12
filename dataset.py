@@ -328,7 +328,7 @@ def get_data_loaders(api_dict, class_dict, class_to_api_dict, args):
                                          api_dict,
                                          class_dict,
                                          args.api_max_len)
-    elif args.model == 'my_model':
+    elif args.model == 'my_model' or args.model == 'my_model+':
         train_data_set = MyDataSet(train_data_set_path,
                                    api_dict,
                                    class_dict,
