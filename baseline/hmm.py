@@ -117,6 +117,7 @@ def test_hmm(test_path, model_save_path):
 
                 hit_loc, seq_info = test(data, hole_class, model_save_path, label, already_test)
                 if hit_loc == -2:
+                    print('already exists...')
                     continue
                 seq_len, hole_rate, class_num = seq_info
 
