@@ -89,6 +89,8 @@ def deal_with_sample(api_seq):
     seq_info = [seq_len, hole_rate, class_num]
     return seq_info
 
+# write to tensorboard
+writer = SummaryWriter(logdir='../test_logs/hmm/')
 
 def test_hmm(test_path, model_save_path):
     for file in os.listdir(test_path):
@@ -130,8 +132,6 @@ def test_hmm(test_path, model_save_path):
                     mrr_with_hole_loc[hole_rate-1] += mrr
                     total_mrr += mrr
 
-        # write to tensorboard
-        writer = SummaryWriter(logdir='../test_logs/hmm/')
         for i in range(len(top_k_num)):
             top_k_i = top_k_num[i] / total_num
             writer.add_scalar(file + '/' + ' top-k', top_k_i, i + 1)
