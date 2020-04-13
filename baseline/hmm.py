@@ -106,6 +106,7 @@ def test_hmm(test_path, model_save_path):
         total_num_wih_seq_len = [0] * 10
         mrr_with_class_num = [0.] * 10
         total_num_with_class_num = [0] * 10
+        already_test = []
         with open(test_path + file, 'r') as f:
             for line in f:
                 line = line.strip()
@@ -113,7 +114,10 @@ def test_hmm(test_path, model_save_path):
                 data = items[0]
                 label = items[1]
                 hole_class = label.split('.')[0]
-                hit_loc, seq_info = test(data, hole_class, model_save_path, label)
+
+                hit_loc, seq_info = test(data, hole_class, model_save_path, label, already_test)
+                if hit_loc == -2:
+                    continue
                 seq_len, hole_rate, class_num = seq_info
 
                 total_num += 1
@@ -159,7 +163,7 @@ def test_hmm(test_path, model_save_path):
     writer.close()
 
 
-def test(api_seq, hole_class, save_path, label):
+def test(api_seq, hole_class, save_path, label, already_test):
     observation_seq = []
     items = api_seq.split()
     seq_info = deal_with_sample(items)
@@ -180,6 +184,11 @@ def test(api_seq, hole_class, save_path, label):
             api_name = class_name + '.' + api_name
             if api_name in api_list:
                 observation_seq.append(api_list.index(api_name))
+
+    if observation_seq in already_test:
+        return -2, None
+
+    already_test.append(observation_seq)
 
     scores = []
     hole_loc = observation_seq.index(-1)
