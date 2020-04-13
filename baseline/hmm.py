@@ -7,6 +7,7 @@ import pickle
 
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
+import copy
 import os
 
 
@@ -191,7 +192,7 @@ def test(api_seq, hole_class, save_path, label):
     if observation_seq in already_test:
         return -2, None
 
-    already_test.append(observation_seq)
+    already_test.append(copy.deepcopy(observation_seq))
 
     scores = []
     hole_loc = observation_seq.index(-1)
@@ -249,6 +250,6 @@ if __name__ == '__main__':
         output[class_dict[class_id]] = []
         for api_id in class_to_api_dict[class_id]:
             output[class_dict[class_id]].append(api_dict[api_id])
-    # train(api_seq_path, output, save_path)
+    #train(api_seq_path, output, save_path)
     model_save_path = '../models/hmm/'
     test_hmm('../data/test/', model_save_path)
