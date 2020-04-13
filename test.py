@@ -59,7 +59,7 @@ def test(args, api_dict, class_dict, class_to_api_dict):
             test_data_loader = DataLoader(dataset=test_data_set,
                                           batch_size=args.batch_size,
                                           shuffle=False)
-        elif args.model == 'APIHelper':
+        elif args.model == 'APIHelper' or args.model == 'APIHelper+':
             test_data_set = APIHelperDataSet(project_path,
                                              api_dict,
                                              class_dict,
