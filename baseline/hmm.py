@@ -91,6 +91,8 @@ def deal_with_sample(api_seq):
 
 # write to tensorboard
 writer = SummaryWriter(logdir='../test_logs/hmm/')
+already_test = []
+
 
 def test_hmm(test_path, model_save_path):
     for file in os.listdir(test_path):
@@ -106,7 +108,7 @@ def test_hmm(test_path, model_save_path):
         total_num_wih_seq_len = [0] * 10
         mrr_with_class_num = [0.] * 10
         total_num_with_class_num = [0] * 10
-        already_test = []
+        already_test.clear()
         with open(test_path + file, 'r') as f:
             for line in f:
                 line = line.strip()
@@ -115,7 +117,7 @@ def test_hmm(test_path, model_save_path):
                 label = items[1]
                 hole_class = label.split('.')[0]
 
-                hit_loc, seq_info = test(data, hole_class, model_save_path, label, already_test)
+                hit_loc, seq_info = test(data, hole_class, model_save_path, label)
                 if hit_loc == -2:
                     print('already exists...')
                     continue
@@ -164,7 +166,7 @@ def test_hmm(test_path, model_save_path):
     writer.close()
 
 
-def test(api_seq, hole_class, save_path, label, already_test):
+def test(api_seq, hole_class, save_path, label):
     observation_seq = []
     items = api_seq.split()
     seq_info = deal_with_sample(items)
