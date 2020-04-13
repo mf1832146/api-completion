@@ -120,7 +120,7 @@ def test_hmm(test_path, model_save_path):
 
                 hit_loc, seq_info = test(data, hole_class, model_save_path, label)
                 if hit_loc == -2:
-                    print('already exists...')
+                    print('... in file' + file)
                     continue
                 seq_len, hole_rate, class_num = seq_info
 
@@ -189,10 +189,10 @@ def test(api_seq, hole_class, save_path, label):
             if api_name in api_list:
                 observation_seq.append(api_list.index(api_name))
 
-    if observation_seq in already_test:
+    if api_seq in already_test:
         return -2, None
 
-    already_test.append(copy.deepcopy(observation_seq))
+    already_test.append(copy.deepcopy(api_seq))
 
     scores = []
     hole_loc = observation_seq.index(-1)
