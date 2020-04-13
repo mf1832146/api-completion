@@ -4,14 +4,14 @@ import collections
 
 
 class MyDataSet(Dataset):
-    def __init__(self, data_path, api_dict, class_dict, class_to_api_dict, max_class_len, max_api_len):
+    def __init__(self, data_path, api_dict, class_dict, class_to_api_dict, max_class_len, max_api_len, need_unique=False):
         self.api_dict = api_dict
         self.class_dict = class_dict
         self.class_to_api_dict = class_to_api_dict
         self.max_api_len = max_api_len
         self.max_class_len = max_class_len
         self.max_candidate_api_len = 200
-        self.data_set = load_data_set(data_path)
+        self.data_set = load_data_set(data_path, need_unique)
 
     def __len__(self):
         return len(self.data_set)
@@ -110,11 +110,11 @@ class MyDataSet(Dataset):
 
 
 class APIHelperDataSet(Dataset):
-    def __init__(self, data_path, api_dict, class_dict, class_to_api_dict, max_len):
+    def __init__(self, data_path, api_dict, class_dict, class_to_api_dict, max_len, need_unique=False):
         self.api_dict = api_dict
         self.class_dict = class_dict
         self.max_len = max_len
-        self.data_set = load_data_set(data_path)
+        self.data_set = load_data_set(data_path, need_unique)
         self.api_len = len(self.api_dict)
         self.class_to_api_dict = class_to_api_dict
 
@@ -166,11 +166,11 @@ class APIHelperDataSet(Dataset):
 
 
 class NGramDataSet(Dataset):
-    def __init__(self, data_path, api_dict, class_dict, k):
+    def __init__(self, data_path, api_dict, class_dict, k, need_unique=False):
         self.api_dict = api_dict
         self.class_dict = class_dict
         self.k = k
-        self.data_set = load_data_set(data_path)
+        self.data_set = load_data_set(data_path, need_unique)
 
     def __len__(self):
         return len(self.data_set)
@@ -210,11 +210,11 @@ class NGramDataSet(Dataset):
 
 
 class StandardDataSet(Dataset):
-    def __init__(self, data_path, api_dict, class_dict, max_len):
+    def __init__(self, data_path, api_dict, class_dict, max_len, need_unique=False):
         self.api_dict = api_dict
         self.class_dict = class_dict
         self.max_len = max_len
-        self.data_set = load_data_set(data_path)
+        self.data_set = load_data_set(data_path, need_unique)
 
     def __len__(self):
         return len(self.data_set)
@@ -275,8 +275,9 @@ def pad_seq(class_seq, api_seq, max_len):
     return class_seq, api_seq
 
 
-def load_data_set(data_set_path):
+def load_data_set(data_set_path, need_unique=False):
     data = []
+    already_contains = []
     with open(data_set_path, 'r') as f:
         for line in f:
             line = line.strip()
@@ -284,6 +285,10 @@ def load_data_set(data_set_path):
             items = line.split(";")
             sample['data'] = items[0]
             sample['label'] = items[1]
+            if need_unique:
+                if line in already_contains:
+                    continue
+                already_contains.append(line)
             data.append(sample)
     return data
 
@@ -317,8 +322,8 @@ def deal_with_sample(api_seq):
 
 
 def get_data_loaders(api_dict, class_dict, class_to_api_dict, args):
-    train_data_set_path = args.data_dir + 'train/data_set_all.txt'
-    valid_data_set_path = args.data_dir + 'valid/data_set_all.txt'
+    train_data_set_path = args.data_dir + 'test_train/data_set_all.txt'
+    valid_data_set_path = args.data_dir + 'test_valid/data_set_all.txt'
     if args.model == 'lstm':
         train_data_set = StandardDataSet(train_data_set_path,
                                          api_dict,

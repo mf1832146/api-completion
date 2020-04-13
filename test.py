@@ -45,7 +45,8 @@ def test(args, api_dict, class_dict, class_to_api_dict):
             test_data_set = StandardDataSet(project_path,
                                             api_dict,
                                             class_dict,
-                                            args.api_max_len)
+                                            args.api_max_len,
+                                            need_unique=True)
             test_data_loader = DataLoader(dataset=test_data_set,
                                           batch_size=args.batch_size,
                                           shuffle=False)
@@ -55,7 +56,8 @@ def test(args, api_dict, class_dict, class_to_api_dict):
                                       class_dict,
                                       class_to_api_dict,
                                       args.class_max_len,
-                                      args.api_max_len)
+                                      args.api_max_len,
+                                      need_unique=True)
             test_data_loader = DataLoader(dataset=test_data_set,
                                           batch_size=args.batch_size,
                                           shuffle=False)
@@ -64,7 +66,8 @@ def test(args, api_dict, class_dict, class_to_api_dict):
                                              api_dict,
                                              class_dict,
                                              class_to_api_dict,
-                                             args.api_max_len)
+                                             args.api_max_len,
+                                             need_unique=True)
             test_data_loader = DataLoader(dataset=test_data_set,
                                           batch_size=args.batch_size,
                                           shuffle=False)
@@ -72,7 +75,8 @@ def test(args, api_dict, class_dict, class_to_api_dict):
             test_data_set = NGramDataSet(project_path,
                                          api_dict,
                                          class_dict,
-                                         2)
+                                         2,
+                                         need_unique=True)
             test_data_loader = DataLoader(dataset=test_data_set,
                                           batch_size=args.batch_size,
                                           shuffle=False)
